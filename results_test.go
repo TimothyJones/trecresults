@@ -26,6 +26,23 @@ func CheckResult(r *Result,topic int64,iteration string,docid string,rank int64,
   }
 }
 
+func TestReadLineIncorrectSize(t *testing.T) {
+  r,err := ResultFromLine("401 Q0 LA110990-0013 0 13.7471758025085")
+  if err == nil {
+    t.Error("Expected error, but got nothing")
+  }
+  if r != nil {
+    t.Error("Expected nil result but got",r)
+  }
+
+  r,err = ResultFromLine("402 Q1 document 2 12.028 greatrun anotherfield")
+  if err == nil {
+    t.Error("Expected error, but got nothing")
+  }
+  if r != nil {
+    t.Error("Expected nil result but got",r)
+  }
+}
 
 func TestReadLineGood(t *testing.T) {
   r,err := ResultFromLine("401 Q0 LA110990-0013 0 13.74717580250855 BB2c1.0")
