@@ -24,6 +24,11 @@ type Result struct {
 // Type definition for a result list
 type ResultList []*Result
 
+// Functions for sorting a result list by score
+func (r ResultList) Len() int           { return len(r) }
+func (r ResultList) Swap(i, j int)      { r[i], r[j] = r[j], r[i] }
+func (r ResultList) Less(i, j int) bool { return r[i].Score > r[j].Score }
+
 // Formats a result structure into the original string representation that can be used with treceval
 func (r *Result) String() string {
   return fmt.Sprintf("%d %s %s %d %g %s",r.Topic,r.Iteration,r.DocId,r.Rank,r.Score,r.RunName)
