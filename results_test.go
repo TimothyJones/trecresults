@@ -3,6 +3,7 @@ package trecresults
 import (
   "testing"
   "strconv"
+  "strings"
 )
 
 func CheckResult(r *Result,topic int64,iteration string,docid string,rank int64,score float64,runname string, line string,t *testing.T) {
@@ -120,3 +121,35 @@ func TestReadLineBadScore(t *testing.T) {
     t.Error("Expected nil response but got",r)
   }
 }
+
+func TestResultsFromFile(t *testing.T) {
+  results, err := ResultsFromReader(strings.NewReader(`401 Q0 LA110990-0013 0 13.74717580250855 BB2c1.0
+401 Q0 FBIS3-18833 1 13.662447072667604 BB2c1.0
+401 Q0 FBIS3-39117 2 13.640016012221363 BB2c1.0
+401 Q0 FT941-230 3 13.4799521334611 BB2c1.0
+401 Q0 FT924-1346 4 13.418277205894087 BB2c1.0
+401 Q0 FT941-4640 5 13.32332784351334 BB2c1.0
+401 Q0 LA122190-0057 6 13.278646892401042 BB2c1.0
+401 Q0 FBIS3-18916 7 13.00539383125854 BB2c1.0
+401 Q0 LA030690-0168 8 12.870710238224662 BB2c1.0
+401 Q0 FBIS3-17077 9 12.806848508228754 BB2c1.0
+`))
+  if err != nil {
+    t.Error("Expected no error, but got",err)
+  }
+  if len(results) != 10 {
+    t.Error("Expected 10 results, but got",len(results))
+  }
+
+  CheckResult(results[0],401,"Q0","LA110990-0013",0,13.74717580250855,"BB2c1.0","401 Q0 LA110990-0013 0 13.74717580250855 BB2c1.0",t)
+  CheckResult(results[1],401,"Q0","FBIS3-18833",1,13.662447072667604,"BB2c1.0","401 Q0 FBIS3-18833 1 13.662447072667604 BB2c1.0",t)
+  CheckResult(results[2],401,"Q0","FBIS3-39117",2,13.640016012221363,"BB2c1.0","401 Q0 FBIS3-39117 2 13.640016012221363 BB2c1.0",t)
+  CheckResult(results[3],401,"Q0","FT941-230",3,13.4799521334611,"BB2c1.0","401 Q0 FT941-230 3 13.4799521334611 BB2c1.0",t)
+  CheckResult(results[4],401,"Q0","FT924-1346",4,13.418277205894087,"BB2c1.0","401 Q0 FT924-1346 4 13.418277205894087 BB2c1.0",t)
+  CheckResult(results[5],401,"Q0","FT941-4640",5,13.32332784351334,"BB2c1.0","401 Q0 FT941-4640 5 13.32332784351334 BB2c1.0",t)
+  CheckResult(results[6],401,"Q0","LA122190-0057",6,13.278646892401042,"BB2c1.0","401 Q0 LA122190-0057 6 13.278646892401042 BB2c1.0",t)
+  CheckResult(results[7],401,"Q0","FBIS3-18916",7,13.00539383125854,"BB2c1.0","401 Q0 FBIS3-18916 7 13.00539383125854 BB2c1.0",t)
+  CheckResult(results[8],401,"Q0","LA030690-0168",8,12.870710238224662,"BB2c1.0","401 Q0 LA030690-0168 8 12.870710238224662 BB2c1.0",t)
+  CheckResult(results[9],401,"Q0","FBIS3-17077",9,12.806848508228754,"BB2c1.0","401 Q0 FBIS3-17077 9 12.806848508228754 BB2c1.0",t)
+}
+
