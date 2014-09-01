@@ -1,3 +1,5 @@
+// Package trecresults provides helper functions for reading and writing trec results files
+// suitable for using with treceval
 package trecresults
 
 import (
@@ -9,20 +11,26 @@ import (
   "bufio"
 )
 
-// 401 Q0 LA110990-0013 0 13.74717580250855 BB2c1.0
+// Describes a single entry in a trec result list
 type Result struct {
-  Topic int64
-  Iteration string
-  DocId string
-  Rank int64
-  Score float64
-  RunName string
+  Topic int64      // the integer topic ID
+  Iteration string // the iteration this run is associated with (ignored by treceval)
+  DocId string     // the document ID for this result
+  Rank int64       // the rank in the result list
+  Score float64    // the score the document received for this topic
+  RunName string   // the name of the run this result is from
 }
 
+// Formats a result structure into the original string representation that can be used with treceval
 func (r *Result) String() string {
   return fmt.Sprintf("%d %s %s %d %g %s",r.Topic,r.Iteration,r.DocId,r.Rank,r.Score,r.RunName)
 }
 
+
+// Creates a result structure from a single line from a results file
+// Returns parsing errors if any of the integer or float fields do not parse
+// Returns an error if there are not 6 fields in the result line
+// On error, a nil result is returned
 func ResultFromLine(line string) (*Result, error) {
   split := strings.Fields(line)
 
@@ -52,6 +60,10 @@ func ResultFromLine(line string) (*Result, error) {
   return &Result{topic,iteration,docId,rank,score,runname}, nil
 }
 
+// This function returns a silce of results created from the
+// provided reader (eg a file). 
+// On errors,a slice of every result read up until the error was encountered is
+// returned, along with the error
 func ResultsFromReader(file io.Reader) ([]*Result,error) {
   results := make([]*Result,0,0)
 

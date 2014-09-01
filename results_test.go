@@ -6,6 +6,8 @@ import (
   "strings"
 )
 
+
+// Helper function to check that a result is as expected, and that it correctly reparses as a string
 func CheckResult(r *Result,topic int64,iteration string,docid string,rank int64,score float64,runname string, line string,t *testing.T) {
   if r.Topic != topic {
     t.Error("Expected topic",topic,"got",r.Topic)
@@ -30,6 +32,9 @@ func CheckResult(r *Result,topic int64,iteration string,docid string,rank int64,
   }
 }
 
+
+// Checks that errors are thrown when there are too many or too few
+// fields in this result
 func TestReadLineIncorrectSize(t *testing.T) {
   r,err := ResultFromLine("401 Q0 LA110990-0013 0 13.7471758025085")
   if err == nil {
@@ -48,6 +53,7 @@ func TestReadLineIncorrectSize(t *testing.T) {
   }
 }
 
+// Checks two different well formed result lines
 func TestReadLineGood(t *testing.T) {
   line1 := "401 Q0 LA110990-0013 0 13.74717580250855 BB2c1.0"
   line2 := "402 Q1 document 2 12.028 greatrun"
@@ -65,6 +71,7 @@ func TestReadLineGood(t *testing.T) {
   CheckResult(r,402,"Q1","document",2,12.028,"greatrun",line2,t)
 }
 
+// Checks that the correct error is thrown when a non-integer topic ID is presented
 func TestReadLineBadTopic(t *testing.T) {
   r,err := ResultFromLine("s401 Q0 LA110990-0013 0 13.74717580250855 BB2c1.0")
   if err != nil {
@@ -84,6 +91,7 @@ func TestReadLineBadTopic(t *testing.T) {
   }
 }
 
+// Checks that the correct error is thrown when a non-integer rank is provided
 func TestReadLineBadRank(t *testing.T) {
   r,err := ResultFromLine("401 Q0 LA110990-0013 rank1 13.74717580250855 BB2c1.0")
   if err != nil {
@@ -103,6 +111,8 @@ func TestReadLineBadRank(t *testing.T) {
   }
 }
 
+// Checks that the correct error is thrown when the score cannot be parsed
+// as a float
 func TestReadLineBadScore(t *testing.T) {
   r,err := ResultFromLine("401 Q0 LA110990-0013 1 1-3.74717580250855 BB2c1.0")
   if err != nil {
@@ -122,6 +132,7 @@ func TestReadLineBadScore(t *testing.T) {
   }
 }
 
+// Checks that a sample results file parses correctly
 func TestResultsFromFile(t *testing.T) {
   results, err := ResultsFromReader(strings.NewReader(`401 Q0 LA110990-0013 0 13.74717580250855 BB2c1.0
 401 Q0 FBIS3-18833 1 13.662447072667604 BB2c1.0
