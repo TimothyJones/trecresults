@@ -2,6 +2,7 @@ package trecresults
 
 import (
   "errors"
+  "fmt"
   "strconv"
   "strings"
 )
@@ -14,6 +15,10 @@ type Result struct {
   Rank int64
   Score float64
   RunName string
+}
+
+func (r *Result) String() string {
+  return fmt.Sprintf("%d %s %s %d %g %s",r.Topic,r.Iteration,r.DocId,r.Rank,r.Score,r.RunName)
 }
 
 func ResultFromLine(line string) (*Result, error) {
