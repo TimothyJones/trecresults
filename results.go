@@ -26,7 +26,11 @@ type ResultList []*Result
 
 // Functions for sorting a result list by score
 func (r ResultList) Len() int           { return len(r) }
-func (r ResultList) Swap(i, j int)      { r[i], r[j] = r[j], r[i] }
+func (r ResultList) Swap(i, j int) {
+  r[i], r[j] = r[j], r[i]
+  r[i].Rank = int64(i)
+  r[j].Rank = int64(j)
+}
 func (r ResultList) Less(i, j int) bool { return r[i].Score > r[j].Score }
 
 // Formats a result structure into the original string representation that can be used with treceval
