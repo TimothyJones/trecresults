@@ -33,5 +33,5 @@ Example usage:
       }
 
       // Normalise the scores in the range 0-1
-      r.NormaliseLinear()
+      res.NormaliseLinear()
     }
