@@ -2,6 +2,7 @@ package trecresults
 
 import (
   "testing"
+  "sort"
   "strconv"
   "strings"
 )
@@ -132,6 +133,27 @@ func TestReadLineBadScore(t *testing.T) {
   }
 }
 
+// Checks the sorting works correctly
+func TestResultsSort(t *testing.T) {
+  results, err := ResultsFromReader(strings.NewReader(`401 Q0 LA110990-0013 0 0.89 BB2c1.0
+401 Q0 FBIS3-18833 1 0.9 BB2c1.0
+401 Q0 FBIS3-39117 2 1.1 BB2c1.0
+401 Q0 FT941-230 3 1.2 BB2c1.0
+`))
+  if err != nil {
+    t.Error("Expected no error, but got",err)
+  }
+  if len(results) != 4 {
+    t.Error("Expected 4 results, but got",len(results))
+  }
+  sort.Sort(results)
+
+  CheckResult(results[0],401,"Q0","FT941-230",0,1.2,"BB2c1.0","401 Q0 FT941-230 0 1.2 BB2c1.0",t)
+  CheckResult(results[1],401,"Q0","FBIS3-39117",1,1.1,"BB2c1.0","401 Q0 FBIS3-39117 1 1.1 BB2c1.0",t)
+  CheckResult(results[2],401,"Q0","FBIS3-18833",2,0.9,"BB2c1.0","401 Q0 FBIS3-18833 2 0.9 BB2c1.0",t)
+  CheckResult(results[3],401,"Q0","LA110990-0013",3,0.89,"BB2c1.0","401 Q0 LA110990-0013 3 0.89 BB2c1.0",t)
+}
+
 // Checks that a sample results file parses correctly
 func TestResultsFromFile(t *testing.T) {
   results, err := ResultsFromReader(strings.NewReader(`401 Q0 LA110990-0013 0 13.74717580250855 BB2c1.0
@@ -197,4 +219,3 @@ func TestResultsNormaliseLinear(t *testing.T) {
   CheckResult(results[8],401,"Q0","LA030690-0168",8,0.06791436384373004,"BB2c1.0","401 Q0 LA030690-0168 8 0.06791436384373004 BB2c1.0",t)
   CheckResult(results[9],401,"Q0","FBIS3-17077",9,0,"BB2c1.0","401 Q0 FBIS3-17077 9 0 BB2c1.0",t)
 }
-
