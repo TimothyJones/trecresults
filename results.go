@@ -127,6 +127,13 @@ func (r ResultFile) Sort() {
   }
 }
 
+// This function renames the runs of all result lists in this result file
+func (r ResultFile) RenameRun(newName string) {
+  for _,list := range r.Results {
+    list.RenameRun(newName)
+  }
+}
+
 // This function operates on a slice of results, and normalises the score
 // of each result by score (score - min)/(max - min). This puts scores
 // in to the range 0-1, where 1 is the highest score, and 0 is the lowest.
