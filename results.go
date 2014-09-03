@@ -31,6 +31,10 @@ type ResultFile struct {
   Results map[int64]ResultList
 }
 
+func NewResultFile() *ResultFile{
+  return &ResultFile{make(map[int64]ResultList)}
+}
+
 // Functions for sorting a result list by score
 func (r ResultList) Len() int           { return len(r) }
 func (r ResultList) Swap(i, j int) {
@@ -131,6 +135,13 @@ func (r ResultFile) Sort() {
 func (r ResultFile) RenameRun(newName string) {
   for _,list := range r.Results {
     list.RenameRun(newName)
+  }
+}
+
+// This function normalises the runs of all result lists in this result file
+func (r ResultFile) NormaliseLinear() {
+  for _,list := range r.Results {
+    list.NormaliseLinear()
   }
 }
 
