@@ -3,7 +3,15 @@
     import "github.com/TimothyJones/trecresults"
 
 Package trecresults provides helper functions for reading and writing trec results files
-suitable for using with treceval
+suitable for using with treceval.
+
+It has three main concepts:
+
+ResultFile: Contains a map of results for all topics contained in this results file
+
+ResultList: A slice containing the results for this topic
+
+Result: The data that describes a single entry in a result list
 
 
 
@@ -22,7 +30,9 @@ type Result struct {
     RunName   string  // the name of the run this result is from
 }
 ```
-Describes a single entry in a trec result list
+Describes a single entry in a trec result list.
+
+Implements the fmt.Stringer interface, allowing results to be printed.
 
 
 
@@ -36,10 +46,13 @@ Describes a single entry in a trec result list
 ``` go
 func ResultFromLine(line string) (*Result, error)
 ```
-Creates a result structure from a single line from a results file
-Returns parsing errors if any of the integer or float fields do not parse
-Returns an error if there are not 6 fields in the result line
-On error, a nil result is returned
+Creates a result structure from a single line from a results file.
+
+Returns parsing errors if any of the integer or float fields do not parse.
+
+Returns an error if there are not 6 fields in the result line.
+
+On error, a nil result is returned.
 
 
 
@@ -48,7 +61,7 @@ On error, a nil result is returned
 ``` go
 func (r *Result) String() string
 ```
-Formats a result structure into the original string representation that can be used with treceval
+String method for fmt.Stringer. Formats a result structure into the original string representation that can be used with treceval.
 
 
 
@@ -58,8 +71,7 @@ type ResultFile struct {
     Results map[int64]ResultList
 }
 ```
-Type definition for a result file
-The result file supports multiple topics
+The result file contains a map of all the result lists, indexed by topic ID.
 
 
 
@@ -73,15 +85,18 @@ The result file supports multiple topics
 ``` go
 func NewResultFile() *ResultFile
 ```
+Constructor for a ResultFile pointer
+
 
 ### func ResultsFromReader
 ``` go
 func ResultsFromReader(file io.Reader) (ResultFile, error)
 ```
-This function returns a silce of results created from the
+This function returns a ResultsFile object created from the
 provided reader (eg a file).
-On errors,a slice of every result read up until the error was encountered is
-returned, along with the error
+
+On errors, a ResultFile containing every Result and ResultList read before the error was encountered is
+returned, along with the error.
 
 
 
@@ -90,7 +105,9 @@ returned, along with the error
 ``` go
 func (r ResultFile) NormaliseLinear()
 ```
-This function normalises the runs of all result lists in this result file
+This function normalises the runs of all result lists in this result file.
+
+It calls NormaliseLinear() on each ResultList in this ResultFile
 
 
 
@@ -98,7 +115,9 @@ This function normalises the runs of all result lists in this result file
 ``` go
 func (r ResultFile) RenameRun(newName string)
 ```
-This function renames the runs of all result lists in this result file
+This function renames the runs of all result lists in this result file.
+
+It calls RenameRun(newName) on each ResultList in this ResultFile
 
 
 
@@ -106,7 +125,8 @@ This function renames the runs of all result lists in this result file
 ``` go
 func (r ResultFile) Sort()
 ```
-This function sorts all result lists in this result file
+This function sorts all result lists in this result file. Call this before printing if you
+have modified the scores.
 
 
 
@@ -114,7 +134,11 @@ This function sorts all result lists in this result file
 ``` go
 type ResultList []*Result
 ```
-Type definition for a result list
+ResultList contains a slice of pointers to results for a single topic.
+
+ResultList impliments sort.Interface, allowing it to be sorted by score
+if the score is modified. The swap implementation also updates the rank scored
+by each result.
 
 
 
@@ -130,7 +154,7 @@ Type definition for a result list
 ``` go
 func (r ResultList) Len() int
 ```
-Functions for sorting a result list by score
+Length method for sort.Interface
 
 
 
@@ -138,7 +162,7 @@ Functions for sorting a result list by score
 ``` go
 func (r ResultList) Less(i, j int) bool
 ```
-Results are sorted first score (decreasing)
+Less method for sort.Interface. Results are sorted by decreasing score.
 
 
 
@@ -158,8 +182,8 @@ No assumptions are made as to whether the slice is pre sorted
 ``` go
 func (r ResultList) RenameRun(newName string)
 ```
-This function renames all results in this run. Useful for giving a run a new name
-after manipulation
+This function renames all results in this list. Useful for giving a run a new name
+after manipulation.
 
 
 
@@ -167,6 +191,8 @@ after manipulation
 ``` go
 func (r ResultList) Swap(i, j int)
 ```
+Swap method for sort.Interface. Also updates the ranks of the results correctly.
+
 
 
 
