@@ -135,11 +135,15 @@ func TestReadLineBadScore(t *testing.T) {
 
 // Checks the sorting works correctly
 func TestResultsSort(t *testing.T) {
-  results, err := ResultsFromReader(strings.NewReader(`401 Q0 LA110990-0013 0 0.89 BB2c1.0
+  rf, err := ResultsFromReader(strings.NewReader(`401 Q0 LA110990-0013 0 0.89 BB2c1.0
 401 Q0 FBIS3-18833 1 0.9 BB2c1.0
 401 Q0 FBIS3-39117 2 1.1 BB2c1.0
 401 Q0 FT941-230 3 1.2 BB2c1.0
 `))
+  results,ok := rf.Results[401]
+  if !ok {
+    t.Error("Topic list missing for topic 401")
+  }
   if err != nil {
     t.Error("Expected no error, but got",err)
   }
@@ -156,7 +160,7 @@ func TestResultsSort(t *testing.T) {
 
 // Checks that a sample results file parses correctly
 func TestResultsFromFile(t *testing.T) {
-  results, err := ResultsFromReader(strings.NewReader(`401 Q0 LA110990-0013 0 13.74717580250855 BB2c1.0
+  rf, err := ResultsFromReader(strings.NewReader(`401 Q0 LA110990-0013 0 13.74717580250855 BB2c1.0
 401 Q0 FBIS3-18833 1 13.662447072667604 BB2c1.0
 401 Q0 FBIS3-39117 2 13.640016012221363 BB2c1.0
 401 Q0 FT941-230 3 13.4799521334611 BB2c1.0
@@ -167,6 +171,10 @@ func TestResultsFromFile(t *testing.T) {
 401 Q0 LA030690-0168 8 12.870710238224662 BB2c1.0
 401 Q0 FBIS3-17077 9 12.806848508228754 BB2c1.0
 `))
+  results,ok := rf.Results[401]
+  if !ok {
+    t.Error("Topic list missing for topic 401")
+  }
   if err != nil {
     t.Error("Expected no error, but got",err)
   }
@@ -185,10 +193,9 @@ func TestResultsFromFile(t *testing.T) {
   CheckResult(results[8],401,"Q0","LA030690-0168",8,12.870710238224662,"BB2c1.0","401 Q0 LA030690-0168 8 12.870710238224662 BB2c1.0",t)
   CheckResult(results[9],401,"Q0","FBIS3-17077",9,12.806848508228754,"BB2c1.0","401 Q0 FBIS3-17077 9 12.806848508228754 BB2c1.0",t)
 }
-
 // Checks that a sample results file correctly normalises
 func TestResultsNormaliseLinear(t *testing.T) {
-  results, err := ResultsFromReader(strings.NewReader(`401 Q0 LA110990-0013 0 13.74717580250855 BB2c1.0
+  rf, err := ResultsFromReader(strings.NewReader(`401 Q0 LA110990-0013 0 13.74717580250855 BB2c1.0
 401 Q0 FBIS3-18833 1 13.662447072667604 BB2c1.0
 401 Q0 FBIS3-39117 2 13.640016012221363 BB2c1.0
 401 Q0 FT941-230 3 13.4799521334611 BB2c1.0
@@ -199,6 +206,10 @@ func TestResultsNormaliseLinear(t *testing.T) {
 401 Q0 LA030690-0168 8 12.870710238224662 BB2c1.0
 401 Q0 FBIS3-17077 9 12.806848508228754 BB2c1.0
 `))
+  results,ok := rf.Results[401]
+  if !ok {
+    t.Error("Topic list missing for topic 401")
+  }
   if err != nil {
     t.Error("Expected no error, but got",err)
   }
@@ -218,4 +229,54 @@ func TestResultsNormaliseLinear(t *testing.T) {
   CheckResult(results[7],401,"Q0","FBIS3-18916",7,0.211144911178883,"BB2c1.0","401 Q0 FBIS3-18916 7 0.211144911178883 BB2c1.0",t)
   CheckResult(results[8],401,"Q0","LA030690-0168",8,0.06791436384373004,"BB2c1.0","401 Q0 LA030690-0168 8 0.06791436384373004 BB2c1.0",t)
   CheckResult(results[9],401,"Q0","FBIS3-17077",9,0,"BB2c1.0","401 Q0 FBIS3-17077 9 0 BB2c1.0",t)
+}
+
+// Checks that a sample results file correctly sorts
+func TestResultsiMultipleSort(t *testing.T) {
+  rf, err := ResultsFromReader(strings.NewReader(`401 Q0 LA110990-0013 0 0.2 BB2c1.0
+401 Q0 FBIS3-18833 1 0.3 BB2c1.0
+401 Q0 FBIS3-39117 2 0.5 BB2c1.0
+401 Q0 FT941-230 3 0.6 BB2c1.0
+401 Q0 FT924-1346 4 0.7 BB2c1.0
+402 Q0 FT941-4640 0 13.32332784351334 BB2c1.0
+402 Q0 LA122190-0057 1 13.278646892401042 BB2c1.0
+402 Q0 FBIS3-18916 2 13.00539383125854 BB2c1.0
+402 Q0 LA030690-0168 3 12.870710238224662 BB2c1.0
+402 Q0 FBIS3-17077 4 12.806848508228754 BB2c1.0
+`))
+  rf.Sort()
+  results,ok := rf.Results[401]
+  if !ok {
+    t.Error("Topic list missing for topic 401")
+  }
+  if err != nil {
+    t.Error("Expected no error, but got",err)
+  }
+  if len(results) != 5 {
+    t.Error("Expected 5 results, but got",len(results))
+  }
+
+  CheckResult(results[0],401,"Q0","FT924-1346",0,0.7,"BB2c1.0","401 Q0 FT924-1346 0 0.7 BB2c1.0",t)
+  CheckResult(results[1],401,"Q0","FT941-230",1,0.6,"BB2c1.0","401 Q0 FT941-230 1 0.6 BB2c1.0",t)
+  CheckResult(results[2],401,"Q0","FBIS3-39117",2,0.5,"BB2c1.0","401 Q0 FBIS3-39117 2 0.5 BB2c1.0",t)
+  CheckResult(results[3],401,"Q0","FBIS3-18833",3,0.3,"BB2c1.0","401 Q0 FBIS3-18833 3 0.3 BB2c1.0",t)
+  CheckResult(results[4],401,"Q0","LA110990-0013",4,0.2,"BB2c1.0","401 Q0 LA110990-0013 4 0.2 BB2c1.0",t)
+
+  results,ok = rf.Results[402]
+  if !ok {
+    t.Error("Topic list missing for topic 402")
+  }
+  if err != nil {
+    t.Error("Expected no error, but got",err)
+  }
+  if len(results) != 5 {
+    t.Error("Expected 5 results, but got",len(results))
+  }
+
+
+  CheckResult(results[0],402,"Q0","FT941-4640",0,13.32332784351334,"BB2c1.0","402 Q0 FT941-4640 0 13.32332784351334 BB2c1.0",t)
+  CheckResult(results[1],402,"Q0","LA122190-0057",1,13.278646892401042,"BB2c1.0","402 Q0 LA122190-0057 1 13.278646892401042 BB2c1.0",t)
+  CheckResult(results[2],402,"Q0","FBIS3-18916",2,13.00539383125854,"BB2c1.0","402 Q0 FBIS3-18916 2 13.00539383125854 BB2c1.0",t)
+  CheckResult(results[3],402,"Q0","LA030690-0168",3,12.870710238224662,"BB2c1.0","402 Q0 LA030690-0168 3 12.870710238224662 BB2c1.0",t)
+  CheckResult(results[4],402,"Q0","FBIS3-17077",4,12.806848508228754,"BB2c1.0","402 Q0 FBIS3-17077 4 12.806848508228754 BB2c1.0",t)
 }

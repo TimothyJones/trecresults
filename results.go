@@ -5,6 +5,7 @@ package trecresults
 import (
   "errors"
   "fmt"
+  "sort"
   "strconv"
   "strings"
   "io"
@@ -24,6 +25,12 @@ type Result struct {
 // Type definition for a result list
 type ResultList []*Result
 
+// Type definition for a result file
+// The result file supports multiple topics
+type ResultFile struct {
+  Results map[int64]ResultList
+}
+
 // Functions for sorting a result list by score
 func (r ResultList) Len() int           { return len(r) }
 func (r ResultList) Swap(i, j int) {
@@ -31,7 +38,11 @@ func (r ResultList) Swap(i, j int) {
   r[i].Rank = int64(i)
   r[j].Rank = int64(j)
 }
-func (r ResultList) Less(i, j int) bool { return r[i].Score > r[j].Score }
+
+// Results are sorted first score (decreasing)
+func (r ResultList) Less(i, j int) bool {
+  return r[i].Score > r[j].Score
+}
 
 // Formats a result structure into the original string representation that can be used with treceval
 func (r *Result) String() string {
@@ -76,22 +87,44 @@ func ResultFromLine(line string) (*Result, error) {
 // provided reader (eg a file). 
 // On errors,a slice of every result read up until the error was encountered is
 // returned, along with the error
-func ResultsFromReader(file io.Reader) (ResultList,error) {
-  results := make([]*Result,0,0)
+func ResultsFromReader(file io.Reader) (ResultFile,error) {
+  var rf ResultFile
+  rf.Results = make(map[int64]ResultList)
 
   scanner := bufio.NewScanner(file)
   for scanner.Scan() {
     r, err := ResultFromLine(scanner.Text())
-    if err != nil {
-      return results, err
+    results,ok := rf.Results[r.Topic]
+    if !ok {
+      results = make([]*Result,0,0)
+      rf.Results[r.Topic] = results
     }
-    results = append(results,r)
+
+    if err != nil {
+      return rf, err
+    }
+    rf.Results[r.Topic] = append(results,r)
   }
 
   if err := scanner.Err(); err != nil {
-    return results, err
+    return rf, err
   }
-  return results, nil
+  return rf, nil
+}
+
+// This function renames all results in this run. Useful for giving a run a new name
+// after manipulation
+func (r ResultList) RenameRun(newName string) {
+  for _,res := range r {
+    res.RunName = newName
+  }
+}
+
+// This function sorts all result lists in this result file
+func (r ResultFile) Sort() {
+  for _,list := range r.Results {
+    sort.Sort(list)
+  }
 }
 
 // This function operates on a slice of results, and normalises the score
