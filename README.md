@@ -19,6 +19,90 @@ Result: The data that describes a single entry in a result list
 
 
 
+## type Qrel
+``` go
+type Qrel struct {
+    Topic     int64  // The topic that this qrel is associated with
+    Iteration string // Ignored by treceval
+    DocId     string // the docid
+    Score     int64  // the relevance score for this document
+}
+```
+
+
+
+
+
+
+
+
+### func QrelFromLine
+``` go
+func QrelFromLine(line string) (*Qrel, error)
+```
+Creates a qrel structure from a single line from a results file.
+
+Returns parsing errors if any of the integer or float fields do not parse.
+
+Returns an error if there are not 4 fields in the result line.
+
+On error, a nil result is returned.
+
+
+
+
+## type Qrels
+``` go
+type Qrels map[string]*Qrel
+```
+Qrels is a map of docids to relevance value
+
+
+
+
+
+
+
+
+
+
+
+## type QrelsFile
+``` go
+type QrelsFile struct {
+    Qrels map[int64]Qrels
+}
+```
+The result file contains a map of all qrels lists, indexed by topic ID.
+
+
+
+
+
+
+
+
+
+### func NewQrelsFile
+``` go
+func NewQrelsFile() *QrelsFile
+```
+Constructor for a QrelsFile pointer
+
+
+### func QrelsFromReader
+``` go
+func QrelsFromReader(file io.Reader) (QrelsFile, error)
+```
+This function returns a QrelsFile object created from the
+provided reader (eg a file).
+
+On errors, a QrelsFile containing all qrels read before the error was encountered is
+returned, along with the error.
+
+
+
+
 ## type Result
 ``` go
 type Result struct {

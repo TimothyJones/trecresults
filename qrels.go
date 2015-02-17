@@ -1,13 +1,3 @@
-// Package trecresults provides helper functions for reading and writing trec results files
-// suitable for using with treceval.
-// 
-// It has three main concepts:
-//
-// ResultFile: Contains a map of results for all topics contained in this results file
-//
-// ResultList: A slice containing the results for this topic
-//
-// Result: The data that describes a single entry in a result list
 package trecresults
 
 import (
@@ -38,15 +28,13 @@ func NewQrelsFile() *QrelsFile{
   return &QrelsFile{make(map[int64]Qrels)}
 }
 
-// Creates a result structure from a single line from a results file.
+// Creates a qrel structure from a single line from a results file.
 //
 // Returns parsing errors if any of the integer or float fields do not parse.
 //
-// Returns an error if there are not 6 fields in the result line.
+// Returns an error if there are not 4 fields in the result line.
 //
 // On error, a nil result is returned.
-// 201 0 AP880221-0047 0
-// 201 0 AP880223-0069 0
 func QrelFromLine(line string) (*Qrel, error) {
   split := strings.Fields(line)
 
@@ -69,10 +57,10 @@ func QrelFromLine(line string) (*Qrel, error) {
   return &Qrel{topic,iteration,docId,score}, nil
 }
 
-// This function returns a ResultsFile object created from the
+// This function returns a QrelsFile object created from the
 // provided reader (eg a file). 
 //
-// On errors, a ResultFile containing every Result and ResultList read before the error was encountered is
+// On errors, a QrelsFile containing all qrels read before the error was encountered is
 // returned, along with the error.
 func QrelsFromReader(file io.Reader) (QrelsFile,error) {
   var qf QrelsFile
