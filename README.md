@@ -5,6 +5,9 @@
 Package trecresults provides helper functions for reading and writing trec results files
 suitable for using with treceval.
 
+[![Build Status](https://travis-ci.org/TimothyJones/trecresults.svg?branch=master)](https://travis-ci.org/TimothyJones/trecresults)
+
+
 It has three main concepts:
 
 ResultFile: Contains a map of results for all topics contained in this results file
